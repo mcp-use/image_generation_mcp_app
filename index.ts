@@ -689,7 +689,7 @@ const transformImageSchema = z.object({
   {
     name: "transform_image",
     description:
-      "Edit an existing image using a prompt and return a picker UI with downloadable results.",
+      "Edit an existing image using a prompt. Requires a publicly accessible image_url (https://) or a base64 data URL in encoded_image. Do NOT pass local file paths — if the user uploaded an image in chat and no public URL is available, use show_upload_box instead.",
     schema: transformImageSchema,
     widget: {
       name: "image-picker",
@@ -768,6 +768,37 @@ const showRecentImagesSchema = z.object({
         images.length
           ? `Showing ${images.length} recent generated image(s).`
           : "No generated images are currently available in memory."
+      ),
+    });
+  }
+);
+
+const showUploadBoxSchema = z.object({
+  title: z
+    .string()
+    .optional()
+    .describe("Optional title for the upload widget"),
+});
+
+(server as any).tool(
+  {
+    name: "show_upload_box",
+    description:
+      "Show an image upload widget so the user can upload an image from their device and apply AI edits. Use this when the user wants to edit an image they uploaded in chat (since local file paths cannot be passed to transform_image).",
+    schema: showUploadBoxSchema,
+    widget: {
+      name: "image-editor",
+      invoking: "Opening image editor...",
+      invoked: "Image editor ready",
+    },
+  },
+  async ({ title }: any) => {
+    return widget({
+      props: {
+        title: title ?? "Upload & Transform Image",
+      },
+      output: text(
+        "Image editor is ready. Upload an image and describe the transformation you want."
       ),
     });
   }

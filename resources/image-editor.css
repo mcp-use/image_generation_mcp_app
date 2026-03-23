@@ -1,0 +1,334 @@
+/* ── Shared design tokens (shadcn/zinc palette) ── */
+
+.editor-shell {
+  --bg: #ffffff;
+  --bg-card: #fafafa;
+  --bg-muted: #f4f4f5;
+  --fg: #09090b;
+  --fg-secondary: #52525b;
+  --fg-muted: #a1a1aa;
+  --border: #e4e4e7;
+  --border-hover: #a1a1aa;
+  --ring: #18181b;
+  --accent: #18181b;
+  --accent-fg: #fafafa;
+  --destructive: #ef4444;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.08), 0 1px 2px rgb(0 0 0 / 0.04);
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-xs);
+}
+
+.editor-shell.theme-dark {
+  --bg: #09090b;
+  --bg-card: #18181b;
+  --bg-muted: #27272a;
+  --fg: #fafafa;
+  --fg-secondary: #a1a1aa;
+  --fg-muted: #71717a;
+  --border: #27272a;
+  --border-hover: #3f3f46;
+  --ring: #d4d4d8;
+  --accent: #fafafa;
+  --accent-fg: #18181b;
+  --destructive: #f87171;
+}
+
+/* ── Header ── */
+
+.editor-header {
+  margin-bottom: 20px;
+}
+
+.editor-header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.editor-subtitle {
+  margin: 4px 0 0;
+  color: var(--fg-muted);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+/* ── Dropzone ── */
+
+.editor-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  background: var(--bg);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.editor-dropzone:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-muted);
+}
+
+.editor-dropzone.is-dragover {
+  border-color: var(--ring);
+  background: var(--bg-muted);
+  box-shadow: 0 0 0 3px rgb(0 0 0 / 0.05);
+}
+
+.theme-dark .editor-dropzone.is-dragover {
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.06);
+}
+
+.editor-dropzone-inner {
+  text-align: center;
+  padding: 24px;
+}
+
+.editor-dropzone-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: var(--bg-muted);
+  color: var(--fg-muted);
+}
+
+.editor-dropzone-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.editor-dropzone-label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.editor-dropzone-hint {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+/* ── Preview card ── */
+
+.editor-preview-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.editor-preview-image {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  background: var(--bg-muted);
+}
+
+.editor-preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.editor-preview-name {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--fg-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.editor-preview-change {
+  all: unset;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+  transition: color 0.15s;
+}
+
+.editor-preview-change:hover {
+  color: var(--fg);
+}
+
+/* ── Form ── */
+
+.editor-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.editor-field {
+  display: grid;
+  gap: 6px;
+}
+
+.editor-label {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.editor-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.editor-textarea::placeholder {
+  color: var(--fg-muted);
+}
+
+.editor-textarea:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 0.05);
+}
+
+.theme-dark .editor-textarea:focus {
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.06);
+}
+
+.editor-textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Buttons ── */
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.editor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+}
+
+.editor-btn:hover {
+  background: var(--bg-muted);
+  border-color: var(--border-hover);
+}
+
+.editor-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.editor-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.editor-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+
+.editor-btn-primary:hover {
+  opacity: 0.9;
+  background: var(--accent);
+}
+
+/* ── Spinner ── */
+
+.editor-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: editor-spin 0.6s linear infinite;
+}
+
+@keyframes editor-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Error ── */
+
+.editor-error {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: rgb(239 68 68 / 0.08);
+  border: 1px solid rgb(239 68 68 / 0.2);
+  color: var(--destructive);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 480px) {
+  .editor-shell {
+    padding: 14px;
+  }
+
+  .editor-dropzone {
+    min-height: 150px;
+  }
+
+  .editor-actions {
+    flex-direction: column;
+  }
+
+  .editor-btn {
+    width: 100%;
+  }
+}
