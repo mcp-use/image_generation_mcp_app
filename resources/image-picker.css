@@ -188,6 +188,137 @@
   word-break: break-all;
 }
 
+/* --- Edit / Upload section --- */
+
+.picker-edit-toggle {
+  margin-top: 12px;
+}
+
+.picker-edit-panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-subtle);
+  display: grid;
+  gap: 12px;
+}
+
+.picker-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.picker-edit-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.picker-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.picker-dropzone:hover,
+.picker-dropzone.is-dragover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.picker-dropzone-content {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.picker-dropzone-icon {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.picker-dropzone-content p {
+  margin: 4px 0;
+  font-size: 0.88rem;
+}
+
+.picker-dropzone-hint {
+  color: var(--text-muted);
+  font-size: 0.78rem !important;
+}
+
+.picker-edit-preview {
+  position: relative;
+  text-align: center;
+}
+
+.picker-edit-image {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: var(--surface-muted);
+}
+
+.picker-edit-change {
+  margin-top: 8px;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.picker-edit-form {
+  display: grid;
+  gap: 8px;
+}
+
+.picker-edit-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.picker-edit-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.picker-edit-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.picker-edit-textarea:disabled {
+  opacity: 0.6;
+}
+
+.picker-edit-submit {
+  justify-self: start;
+}
+
 @media (max-width: 900px) {
   .picker-shell {
     padding: 12px;

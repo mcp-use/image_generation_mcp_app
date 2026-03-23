@@ -1,4 +1,4 @@
-import { McpUseProvider, useWidget, type WidgetMetadata } from "mcp-use/react";
+import { McpUseProvider, useWidget, useFiles, type WidgetMetadata } from "mcp-use/react";
 import React from "react";
 import { z } from "zod";
 
@@ -40,7 +40,7 @@ export const widgetMetadata: WidgetMetadata = {
       "Select an image result, preview it, and download it directly.",
   },
   annotations: {
-    readOnlyHint: true,
+    readOnlyHint: false,
   },
 };
 
@@ -128,8 +128,10 @@ function getRenderableSource(image: PickerImage, mcpUrl: string): string {
 }
 
 const ImagePickerWidget: React.FC = () => {
-  const { props, output, metadata, isPending, theme, mcp_url, openExternal } =
+  const { props, output, metadata, isPending, theme, mcp_url, openExternal, callTool } =
     useWidget<PickerProps, UnknownRecord, UnknownRecord>();
+
+  const { upload, isSupported: filesSupported } = useFiles();
 
   const propsFromHook = normalizeProps(props);
 
@@ -277,6 +279,101 @@ const ImagePickerWidget: React.FC = () => {
     [mcp_url, openExternal]
   );
 
+  // --- Image editing state ---
+  const [editMode, setEditMode] = React.useState(false);
+  const [uploadedImage, setUploadedImage] = React.useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = React.useState<string | null>(null);
+  const [editPrompt, setEditPrompt] = React.useState("");
+  const [isTransforming, setIsTransforming] = React.useState(false);
+  const [editError, setEditError] = React.useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const readFileAsDataUrl = React.useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  }, []);
+
+  const handleFileSelected = React.useCallback(
+    async (file: File) => {
+      if (!file.type.startsWith("image/")) {
+        setEditError("Please select an image file (PNG, JPEG, WebP, etc.)");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setEditError("Image must be smaller than 10MB");
+        return;
+      }
+      setEditError(null);
+      try {
+        if (filesSupported) {
+          await upload(file, { modelVisible: true });
+        }
+        const dataUrl = await readFileAsDataUrl(file);
+        setUploadedImage(dataUrl);
+        setUploadedFileName(file.name);
+      } catch (err) {
+        setEditError(err instanceof Error ? err.message : "Failed to load image");
+      }
+    },
+    [filesSupported, upload, readFileAsDataUrl]
+  );
+
+  const handleDrop = React.useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFileSelected(file);
+    },
+    [handleFileSelected]
+  );
+
+  const handleDragOver = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = React.useCallback(() => {
+    setIsDragOver(false);
+  }, []);
+
+  const handleTransform = React.useCallback(async () => {
+    if (!uploadedImage || !editPrompt.trim()) return;
+    setIsTransforming(true);
+    setEditError(null);
+    try {
+      await callTool("transform_image", {
+        prompt: editPrompt.trim(),
+        encoded_image: uploadedImage,
+        image_count: 1,
+      });
+      setEditMode(false);
+      setUploadedImage(null);
+      setUploadedFileName(null);
+      setEditPrompt("");
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Transformation failed");
+    } finally {
+      setIsTransforming(false);
+    }
+  }, [uploadedImage, editPrompt, callTool]);
+
+  const handleEditSelectedImage = React.useCallback(() => {
+    if (!selectedImage) return;
+    const source = getRenderableSource(selectedImage, mcp_url);
+    if (source) {
+      setUploadedImage(source);
+      setUploadedFileName(`Image ${selectedIndex}`);
+      setEditMode(true);
+      setEditError(null);
+    }
+  }, [selectedImage, mcp_url, selectedIndex]);
+
   const selectedImageUrl = selectedImage ? resolveImageUrl(selectedImage, mcp_url) : "";
   const selectedImageSource = selectedImage
     ? getRenderableSource(selectedImage, mcp_url)
@@ -303,16 +400,120 @@ const ImagePickerWidget: React.FC = () => {
           ) : null}
         </header>
 
-        {isPending ? (
+        {/* Edit Image Section */}
+        {editMode ? (
+          <div className="picker-edit-panel">
+            <div className="picker-edit-header">
+              <h3>Edit Image</h3>
+              <button
+                type="button"
+                className="picker-action"
+                onClick={() => {
+                  setEditMode(false);
+                  setUploadedImage(null);
+                  setUploadedFileName(null);
+                  setEditPrompt("");
+                  setEditError(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+
+            {!uploadedImage ? (
+              <div
+                className={`picker-dropzone ${isDragOver ? "is-dragover" : ""}`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/gif,image/webp,image/bmp,image/tiff"
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileSelected(file);
+                  }}
+                />
+                <div className="picker-dropzone-content">
+                  <span className="picker-dropzone-icon">+</span>
+                  <p>Drop an image here or click to browse</p>
+                  <p className="picker-dropzone-hint">PNG, JPEG, WebP, GIF — max 10MB</p>
+                </div>
+              </div>
+            ) : (
+              <div className="picker-edit-preview">
+                <img
+                  className="picker-edit-image"
+                  src={uploadedImage}
+                  alt={uploadedFileName ?? "Uploaded image"}
+                />
+                <button
+                  type="button"
+                  className="picker-edit-change"
+                  onClick={() => {
+                    setUploadedImage(null);
+                    setUploadedFileName(null);
+                  }}
+                >
+                  Change image
+                </button>
+              </div>
+            )}
+
+            <div className="picker-edit-form">
+              <label className="picker-edit-label" htmlFor="edit-prompt">
+                Transformation prompt
+              </label>
+              <textarea
+                id="edit-prompt"
+                className="picker-edit-textarea"
+                placeholder="Describe how to edit this image..."
+                value={editPrompt}
+                onChange={(e) => setEditPrompt(e.target.value)}
+                rows={3}
+                disabled={isTransforming}
+              />
+              <button
+                type="button"
+                className="picker-action picker-action-primary picker-edit-submit"
+                disabled={!uploadedImage || !editPrompt.trim() || isTransforming}
+                onClick={handleTransform}
+              >
+                {isTransforming ? "Transforming..." : "Transform Image"}
+              </button>
+            </div>
+
+            {editError ? (
+              <p className="picker-error">{editError}</p>
+            ) : null}
+          </div>
+        ) : (
+          <div className="picker-edit-toggle">
+            <button
+              type="button"
+              className="picker-action"
+              onClick={() => setEditMode(true)}
+            >
+              Upload &amp; Edit Image
+            </button>
+          </div>
+        )}
+
+        {isPending || isTransforming ? (
           <div className="picker-loading" role="status" aria-live="polite">
-            Generating images...
+            {isTransforming ? "Transforming image..." : "Generating images..."}
           </div>
         ) : null}
 
-        {!isPending && !images.length ? (
+        {!isPending && !isTransforming && !images.length && !editMode ? (
           <div className="picker-empty">
             No images available yet. Run <code>generate_image_from_text</code> or{" "}
-            <code>transform_image</code> to populate this picker.
+            <code>transform_image</code> to populate this picker, or click{" "}
+            <strong>Upload &amp; Edit Image</strong> above.
           </div>
         ) : null}
 
@@ -395,6 +596,14 @@ const ImagePickerWidget: React.FC = () => {
                   }}
                 >
                   Open Full Size
+                </button>
+                <button
+                  type="button"
+                  className="picker-action"
+                  disabled={!canOpenSelectedImage}
+                  onClick={handleEditSelectedImage}
+                >
+                  Edit This Image
                 </button>
               </div>
             </div>

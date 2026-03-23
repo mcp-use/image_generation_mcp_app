@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "dotenv": "^16.6.1",
-    "mcp-use": "latest",
+    "mcp-use": "^1.22.0",
     "node-mocks-http": "^1.17.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
